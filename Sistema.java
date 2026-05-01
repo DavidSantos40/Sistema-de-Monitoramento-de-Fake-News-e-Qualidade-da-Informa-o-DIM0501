@@ -1,33 +1,50 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-class D {
-    String t;
-    String c;
+class Noticia {
+    String texto;
+    String classificacao;
 }
 
-public class Sistema {
+public class SistemaFakeNews {
 
-    static ArrayList<D> data = new ArrayList<>();
+    static ArrayList<Noticia> noticias = new ArrayList<>();
 
     // função que faz tudo
-    public static void f(String a, String b) {
-        // adiciona coisa
-        if (a != null && !a.equals("")) {
-            D d = new D();
-            d.t = a;
-
-            if (b == null || b.equals("")) {
-                d.c = "duvidosa";
-            } else {
-                d.c = b;
-            }
-
-            data.add(d);
-        } else {
-            System.out.println("erro");
+    public static void adicionarNoticias(String texto, String categoria) {
+        if (!ehTextoValido(texto)) {
+            System.out.println("Erro: O conteúdo da notícia não pode estar vazio.");
+            return;
         }
+            String categoria = atribuirCategoria(categoria);
+            Noticia novaNoticia = criarNoticia(texto, categoria);
+
+            salvarNoBanco(novaNoticia);
     }
+
+    public static String atribuirCategoria(String categoria){
+        if(categoria == null || categoria.isEmpty()){
+            return "Informação duvidosa!";
+        }
+        return categoria;
+    }
+
+    private static boolean ehTextoValido(String texto){
+        return texto != null && !texto.isEmpty();
+    }
+
+    private static Noticia criarNoticia(String texto, String classificacao){
+        Noticia noticia = new Noticia();
+        noticia.texto = texto;
+        noticia.classificacao = classificacao;
+        return noticia;
+    }
+
+    private static void salvarNoticia(Noticia noticia){
+        noticias.add(noticia);
+    }
+
+    //------------------------------------------------------------------------------------------
 
     public static void func2() {
         // lista tudo
