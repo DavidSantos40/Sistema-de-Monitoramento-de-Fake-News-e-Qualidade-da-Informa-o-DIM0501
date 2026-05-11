@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 class Noticia {
@@ -7,6 +6,12 @@ class Noticia {
     String texto;
     String classificacao;
 
+    public  Noticia (String texto, String classificacao){
+        
+        this.texto = texto;
+        this.classificacao = classificacao;
+        
+    }
 
     
 }
@@ -24,39 +29,40 @@ class view{
     }
 
 
-    public static void ListarNoticiasCadastradas(ArrayList<Noticia> ListaDeNoticas) {
+    public static void listarNoticiasCadastradas(ArrayList<Noticia> listaDeNoticias) {
 
 
 
-        if (ListaDeNoticas.isEmpty()) {
+        if (listaDeNoticias.isEmpty()) {
             System.out.println("Nenhuma notícia cadastrada.");
             return;
         }
-        for (int i = 0; i < ListaDeNoticas.size(); i++) {
 
-            System.out.println("Texto: " + ListaDeNoticas.get(i).texto);
-            System.out.println("Classificacao: " + ListaDeNoticas.get(i).classificacao);
+        for (Noticia noticia : listaDeNoticias) {
+            System.out.println("Texto: " + noticia.texto);
+            System.out.println("Classificacao: " + noticia.classificacao);
             System.out.println("-------------------");
-
         }
+        
     }
 
 }
 
 public class SistemaFakeNews {
 
-    static ArrayList<Noticia> listarNoticiasCadastradas = new ArrayList<>();
+    static ArrayList<Noticia> noticiasCadastradas = new ArrayList<>();
 
-    // função que faz tudo
-    public static void adicionarNoticias(String textoNoticia, String categoria1) {
-        if (!ehTextoValido(textoNoticia)) {
-            System.out.println("Erro: O conteúdo da notícia não pode estar vazio.");
+    public static void adicionarNoticiasAutomatico(String textoNoticia, String categoria1) {
+
+        if (!validarNoticiciaSePossuiTexto(textoNoticia)) {
             return;
         }
             String categoriaFinal = atribuirCategoria(categoria1);
-            Noticia novaNoticia = criarNoticia(textoNoticia, categoriaFinal);
+            Noticia novaNoticia = new Noticia(textoNoticia, categoriaFinal);
 
             adicionarNoticia(novaNoticia);
+
+
     }
 
     public static String atribuirCategoria(String categoria){
@@ -71,41 +77,30 @@ public class SistemaFakeNews {
 
     }
 
-    private static boolean ehTextoValido(String texto){
-
-        return texto != null && !texto.isEmpty();
-
-    }
-
-    private static Noticia criarNoticia(String texto, String classificacao){
-        Noticia noticia = new Noticia();
-        noticia.texto = texto;
-        noticia.classificacao = classificacao;
-        return noticia;
-    }
-
     private static void adicionarNoticia(Noticia noticia){
 
-        listarNoticiasCadastradas.add(noticia);
+        noticiasCadastradas.add(noticia);
 
     }
+
+  
 
     //------------------------------------------------------------------------------------------
 
 
-    public static String analisarCategoria(String txt) {
+    public static String analisarCategoria(String texto) {
         int score = 0;
 
-        if (!txt.contains("FONTE")) {
+        if (!texto.contains("FONTE")) {
             score = score + 1;
         }
-        if (txt.contains("!!!")) {
+        if (texto.contains("!!!")) {
             score = score + 1;
         }
-        if (txt.contains("URGENTE")) {
+        if (texto.contains("URGENTE")) {
             score = score + 1;
         }
-        if (txt.length() < 10) {
+        if (texto.length() < 10) {
             score = score + 1;
         }
 
@@ -118,18 +113,35 @@ public class SistemaFakeNews {
         }
     }
 
+    private static boolean validarNoticiciaSePossuiTexto(String texto){
+        if (texto.trim().isEmpty()) {
+
+            System.out.println("Erro: O conteúdo da notícia não pode estar vazio.");
+            return false;
+        
+        }
+        return true;
+    }
+
+
+
+    //Função separar noticias manuais e automaticas e se possivel criar metodos que se utilize para as duas funções, para evitar repetição de código
     public static void adicionarNoticiaManual(Scanner sc) {
         System.out.print("Digite o texto: ");
         String textoNoticiaManual = sc.nextLine();
 
+        if (!validarNoticiciaSePossuiTexto(textoNoticiaManual)) {
+            return;
+        }
+        
         System.out.print("Digite classificacao: ");
         String categoriaNoticiaManual = sc.nextLine();
 
         if (categoriaNoticiaManual.equals("")) {
             String categoriaVazia = null;
-            adicionarNoticias(textoNoticiaManual, categoriaVazia);
+            adicionarNoticia(new Noticia(textoNoticiaManual, categoriaVazia));
         } else {
-            adicionarNoticias(textoNoticiaManual, categoriaNoticiaManual);
+            adicionarNoticiasAutomatico(textoNoticiaManual, categoriaNoticiaManual);
         }
     }
 
@@ -138,7 +150,7 @@ public class SistemaFakeNews {
         String textoDaNoticia = sc.nextLine();
 
         String categoriaNoticiaAutomatico = analisarCategoria(textoDaNoticia);
-        adicionarNoticias(textoDaNoticia, categoriaNoticiaAutomatico);
+        adicionarNoticiasAutomatico(textoDaNoticia, categoriaNoticiaAutomatico);
     }
 
     public static void menu() {
@@ -156,7 +168,7 @@ public class SistemaFakeNews {
             } else if (opcoes.equals("2")) {
                 adicionarNoticiaAutomatico(sc);
             } else if (opcoes.equals("3")) {
-                view.ListarNoticiasCadastradas(listarNoticiasCadastradas);
+                view.listarNoticiasCadastradas(noticiasCadastradas);
             } else if (opcoes.equals("4")) {
                 break;
             } else {
