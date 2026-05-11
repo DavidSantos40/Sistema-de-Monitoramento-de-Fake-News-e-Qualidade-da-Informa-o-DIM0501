@@ -1,9 +1,46 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 class Noticia {
+
     String texto;
     String classificacao;
+
+
+    
+}
+
+
+class view{
+
+    public static void exibirMenu(){
+
+        System.out.println("1 - adicionar manual");
+            System.out.println("2 - adicionar automatico");
+            System.out.println("3 - listar");
+            System.out.println("4 - sair");
+
+    }
+
+
+    public static void ListarNoticiasCadastradas(ArrayList<Noticia> ListaDeNoticas) {
+
+
+
+        if (ListaDeNoticas.isEmpty()) {
+            System.out.println("Nenhuma notícia cadastrada.");
+            return;
+        }
+        for (int i = 0; i < ListaDeNoticas.size(); i++) {
+
+            System.out.println("Texto: " + ListaDeNoticas.get(i).texto);
+            System.out.println("Classificacao: " + ListaDeNoticas.get(i).classificacao);
+            System.out.println("-------------------");
+
+        }
+    }
+
 }
 
 public class SistemaFakeNews {
@@ -35,7 +72,9 @@ public class SistemaFakeNews {
     }
 
     private static boolean ehTextoValido(String texto){
+
         return texto != null && !texto.isEmpty();
+
     }
 
     private static Noticia criarNoticia(String texto, String classificacao){
@@ -46,19 +85,13 @@ public class SistemaFakeNews {
     }
 
     private static void adicionarNoticia(Noticia noticia){
+
         listarNoticiasCadastradas.add(noticia);
+
     }
 
     //------------------------------------------------------------------------------------------
 
-    public static void func2() {
-        // lista tudo
-        for (int i = 0; i < listarNoticiasCadastradas.size(); i++) {
-            System.out.println("Texto: " + listarNoticiasCadastradas.get(i).texto);
-            System.out.println("Classificacao: " + listarNoticiasCadastradas.get(i).classificacao);
-            System.out.println("-------------------");
-        }
-    }
 
     public static String analisarCategoria(String txt) {
         int score = 0;
@@ -112,10 +145,9 @@ public class SistemaFakeNews {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("1 - adicionar manual");
-            System.out.println("2 - adicionar automatico");
-            System.out.println("3 - listar");
-            System.out.println("4 - sair");
+            
+
+            view.exibirMenu();
 
             String opcoes = sc.nextLine();
 
@@ -124,7 +156,7 @@ public class SistemaFakeNews {
             } else if (opcoes.equals("2")) {
                 adicionarNoticiaAutomatico(sc);
             } else if (opcoes.equals("3")) {
-                func2();
+                view.ListarNoticiasCadastradas(listarNoticiasCadastradas);
             } else if (opcoes.equals("4")) {
                 break;
             } else {
