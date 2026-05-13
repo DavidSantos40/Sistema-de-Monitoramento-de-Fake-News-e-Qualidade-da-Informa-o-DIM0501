@@ -1,186 +1,248 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+
+enum Classificacao {
+    CONFIAVEL,
+    DUVIDOSA,
+    FALSA
+}
 
 class Noticia {
 
-    String texto;
-    String classificacao;
+    private String texto;
+    private Classificacao classificacao;
 
-    public  Noticia (String texto, String classificacao){
-        
+    public Noticia(String texto, Classificacao classificacao) {
         this.texto = texto;
         this.classificacao = classificacao;
-        
     }
 
-    
+    public String getTexto() {
+        return texto;
+    }
+
+    public Classificacao getClassificacao() {
+        return classificacao;
+    }
 }
 
+class View {
 
-class view{
+    public static void exibirMenu() {
 
-    public static void exibirMenu(){
-
-        System.out.println("1 - adicionar manual");
-            System.out.println("2 - adicionar automatico");
-            System.out.println("3 - listar");
-            System.out.println("4 - sair");
-
+        System.out.println("\n===== SISTEMA FAKE NEWS =====");
+        System.out.println("1 - Adicionar notícia manualmente");
+        System.out.println("2 - Adicionar notícia automaticamente");
+        System.out.println("3 - Listar notícias");
+        System.out.println("4 - Sair");
+        System.out.print("Escolha uma opção: ");
     }
 
+    public static void listarNoticias(List<Noticia> noticias) {
 
-    public static void listarNoticiasCadastradas(ArrayList<Noticia> listaDeNoticias) {
-
-
-
-        if (listaDeNoticias.isEmpty()) {
-            System.out.println("Nenhuma notícia cadastrada.");
+        if (noticias.isEmpty()) {
+            System.out.println("\nNenhuma notícia cadastrada.");
             return;
         }
 
-        for (Noticia noticia : listaDeNoticias) {
-            System.out.println("Texto: " + noticia.texto);
-            System.out.println("Classificacao: " + noticia.classificacao);
-            System.out.println("-------------------");
+        System.out.println("\n===== NOTÍCIAS CADASTRADAS =====");
+
+        for (Noticia noticia : noticias) {
+
+            System.out.println("Texto: " + noticia.getTexto());
+            System.out.println("Classificação: " + noticia.getClassificacao());
+            System.out.println("--------------------------------");
         }
-        
     }
 
+    public static void exibirMensagem(String mensagem) {
+        System.out.println(mensagem);
+    }
+}
+
+class NoticiaService {
+
+    private List<Noticia> noticias = new ArrayList<>();
+
+    public void adicionarNoticiaManual(String texto, String classificacaoTexto) {
+
+        if (!validarTexto(texto)) {
+            return;
+        }
+
+        Classificacao classificacao;
+
+        if (classificacaoTexto == null || classificacaoTexto.trim().isEmpty()) {
+
+            classificacao = Classificacao.DUVIDOSA;
+
+        } else {
+
+            classificacao = converterClassificacao(classificacaoTexto);
+
+            if (classificacao == null) {
+
+                View.exibirMensagem("Classificação inválida.");
+                return;
+            }
+        }
+
+        Noticia noticia = new Noticia(texto, classificacao);
+        noticias.add(noticia);
+
+        View.exibirMensagem("Notícia adicionada com sucesso.");
+    }
+
+    public void adicionarNoticiaAutomatica(String texto) {
+
+        if (!validarTexto(texto)) {
+            return;
+        }
+
+        Classificacao classificacao = analisarCategoria(texto);
+
+        Noticia noticia = new Noticia(texto, classificacao);
+
+        noticias.add(noticia);
+
+        View.exibirMensagem("Notícia analisada e adicionada com sucesso.");
+    }
+
+    private boolean validarTexto(String texto) {
+
+        if (texto == null || texto.trim().isEmpty()) {
+
+            View.exibirMensagem("Erro: o texto não pode estar vazio.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private Classificacao converterClassificacao(String texto) {
+
+        texto = texto.trim().toUpperCase();
+
+        try {
+
+            return Classificacao.valueOf(texto);
+
+        } catch (IllegalArgumentException e) {
+
+            return null;
+        }
+    }
+
+    private Classificacao analisarCategoria(String texto) {
+
+        int score = 0;
+
+        String textoMaiusculo = texto.toUpperCase();
+
+        if (!textoMaiusculo.contains("FONTE")) {
+            score++;
+        }
+
+        if (textoMaiusculo.contains("!!!")) {
+            score++;
+        }
+
+        if (textoMaiusculo.contains("URGENTE")) {
+            score++;
+        }
+
+        if (texto.length() < 10) {
+            score++;
+        }
+
+        if (score == 0) {
+
+            return Classificacao.CONFIAVEL;
+
+        } else if (score == 1) {
+
+            return Classificacao.DUVIDOSA;
+
+        } else {
+
+            return Classificacao.FALSA;
+        }
+    }
+
+    public List<Noticia> listarNoticias() {
+        return noticias;
+    }
 }
 
 public class SistemaFakeNews {
 
-    static ArrayList<Noticia> noticiasCadastradas = new ArrayList<>();
+    public static void main(String[] args) {
 
-    public static void adicionarNoticiasAutomatico(String textoNoticia, String categoria1) {
+        Scanner scanner = new Scanner(System.in);
 
-        if (!validarNoticiciaSePossuiTexto(textoNoticia)) {
-            return;
-        }
-            String categoriaFinal = atribuirCategoria(categoria1);
-            Noticia novaNoticia = new Noticia(textoNoticia, categoriaFinal);
+        NoticiaService noticiaService = new NoticiaService();
 
-            adicionarNoticia(novaNoticia);
+        boolean executando = true;
 
+        while (executando) {
 
-    }
+            View.exibirMenu();
 
-    public static String atribuirCategoria(String categoria){
+            String opcao = scanner.nextLine();
 
-        if(categoria == null || categoria.isEmpty()){
+            switch (opcao) {
 
-            return "Informação duvidosa!";
-            
-        }
+                case "1":
 
-        return categoria;
+                    System.out.print("Digite o texto da notícia: ");
+                    String textoManual = scanner.nextLine();
 
-    }
+                    System.out.print("Digite a classificação ");
+                    System.out.println("(CONFIAVEL, DUVIDOSA, FALSA)");
+                    System.out.print("Ou pressione ENTER para padrão: ");
 
-    private static void adicionarNoticia(Noticia noticia){
+                    String classificacaoManual = scanner.nextLine();
 
-        noticiasCadastradas.add(noticia);
+                    noticiaService.adicionarNoticiaManual(
+                            textoManual,
+                            classificacaoManual
+                    );
 
-    }
+                    break;
 
-  
+                case "2":
 
-    //------------------------------------------------------------------------------------------
+                    System.out.print("Digite o texto da notícia: ");
+                    String textoAutomatico = scanner.nextLine();
 
+                    noticiaService.adicionarNoticiaAutomatica(
+                            textoAutomatico
+                    );
 
-    public static String analisarCategoria(String texto) {
-        int score = 0;
+                    break;
 
-        if (!texto.contains("FONTE")) {
-            score = score + 1;
-        }
-        if (texto.contains("!!!")) {
-            score = score + 1;
-        }
-        if (texto.contains("URGENTE")) {
-            score = score + 1;
-        }
-        if (texto.length() < 10) {
-            score = score + 1;
-        }
+                case "3":
 
-        if (score == 0) {
-            return "confiavel";
-        } else if (score == 1) {
-            return "duvidosa";
-        } else {
-            return "falsa";
-        }
-    }
+                    View.listarNoticias(
+                            noticiaService.listarNoticias()
+                    );
 
-    private static boolean validarNoticiciaSePossuiTexto(String texto){
-        if (texto.trim().isEmpty()) {
+                    break;
 
-            System.out.println("Erro: O conteúdo da notícia não pode estar vazio.");
-            return false;
-        
-        }
-        return true;
-    }
+                case "4":
 
+                    executando = false;
+                    View.exibirMensagem("Sistema encerrado.");
 
+                    break;
 
-    //Função separar noticias manuais e automaticas e se possivel criar metodos que se utilize para as duas funções, para evitar repetição de código
-    public static void adicionarNoticiaManual(Scanner sc) {
-        System.out.print("Digite o texto: ");
-        String textoNoticiaManual = sc.nextLine();
+                default:
 
-        if (!validarNoticiciaSePossuiTexto(textoNoticiaManual)) {
-            return;
-        }
-        
-        System.out.print("Digite classificacao: ");
-        String categoriaNoticiaManual = sc.nextLine();
-
-        if (categoriaNoticiaManual.equals("")) {
-            String categoriaVazia = null;
-            adicionarNoticia(new Noticia(textoNoticiaManual, categoriaVazia));
-        } else {
-            adicionarNoticiasAutomatico(textoNoticiaManual, categoriaNoticiaManual);
-        }
-    }
-
-    public static void adicionarNoticiaAutomatico(Scanner sc) {
-        System.out.print("Digite o texto: ");
-        String textoDaNoticia = sc.nextLine();
-
-        String categoriaNoticiaAutomatico = analisarCategoria(textoDaNoticia);
-        adicionarNoticiasAutomatico(textoDaNoticia, categoriaNoticiaAutomatico);
-    }
-
-    public static void menu() {
-        Scanner sc = new Scanner(System.in);
-
-        while (true) {
-            
-
-            view.exibirMenu();
-
-            String opcoes = sc.nextLine();
-
-            if (opcoes.equals("1")) {
-                adicionarNoticiaManual(sc);
-            } else if (opcoes.equals("2")) {
-                adicionarNoticiaAutomatico(sc);
-            } else if (opcoes.equals("3")) {
-                view.listarNoticiasCadastradas(noticiasCadastradas);
-            } else if (opcoes.equals("4")) {
-                break;
-            } else {
-                System.out.println("errado");
+                    View.exibirMensagem("Opção inválida.");
             }
         }
 
-        sc.close();
-    }
-
-    // inicia programa
-    public static void main(String[] args) {
-        menu();
+        scanner.close();
     }
 }
